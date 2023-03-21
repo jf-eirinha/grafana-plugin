@@ -1,7 +1,5 @@
-type SeriesSize = 'sm' | 'md' | 'lg';
+import { NavigationMenu } from 'editor';
 
-export interface SimpleOptions {
-  text: string;
-  showSeriesCount: boolean;
-  seriesCountSize: SeriesSize;
+export interface Options {
+  menu: NavigationMenu;
 }

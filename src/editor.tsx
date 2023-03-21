@@ -1,9 +1,9 @@
 import React from 'react';
 import { PanelOptionsEditorBuilder } from '@grafana/data';
-import { SimpleOptions } from 'types';
+import { Options } from 'types';
 import { Button, Collapse, Field, IconButton, Input } from '@grafana/ui';
 
-type NavigationMenu = MenuItem[];
+export type NavigationMenu = MenuItem[];
 
 type MenuItem = {
   name: string;
@@ -64,6 +64,12 @@ function Editor({ value, onChange }: { value: NavigationMenu; onChange: (value: 
     setState(newState);
   }
 
+  function onMenuNameChange(menuIndex: number, name: string) {
+    const newState = [...state];
+    newState[menuIndex] = { ...newState[menuIndex], name };
+    setState(newState);
+  }
+
   function onSubMenuLinkChange(menuIndex: number, subMenuIndex: number, link: string) {
     const newState = [...state];
     newState[menuIndex].subMenu[subMenuIndex] = { ...newState[menuIndex].subMenu[subMenuIndex], link };
@@ -93,6 +99,10 @@ function Editor({ value, onChange }: { value: NavigationMenu; onChange: (value: 
             onToggle={() => onToggleMenu(menuIndex)}
             collapsible
           >
+            <Field label={'Name'}>
+              <Input value={menu.name} onChange={(e) => onMenuNameChange(menuIndex, e.currentTarget.value)} />
+            </Field>
+
             {menu.subMenu.map((subMenu, subMenuIndex) => {
               return (
                 <Collapse
@@ -144,7 +154,7 @@ function Editor({ value, onChange }: { value: NavigationMenu; onChange: (value: 
   );
 }
 
-export function addEditor(builder: PanelOptionsEditorBuilder<SimpleOptions>) {
+export function addEditor(builder: PanelOptionsEditorBuilder<Options>) {
   builder.addCustomEditor({
     id: 'menu',
     path: 'menu',

@@ -2,7 +2,7 @@ version: '3.0'
 
 services:
   grafana:
-    container_name: 'pipedrive-customnavigation-panel'
+    container_name: 'custom-navigation'
     build:
       context: ./.config
       args:
@@ -10,5 +10,5 @@ services:
     ports:
       - 3000:3000/tcp
     volumes:
-      - ./dist:/var/lib/grafana/plugins/pipedrive-customnavigation-panel
+      - ./dist:/var/lib/grafana/plugins/custom-navigation
       - ./provisioning:/etc/grafana/provisioning

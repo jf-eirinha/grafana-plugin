@@ -1,120 +1,211 @@
 import React from 'react';
-import { PanelOptionsEditorBuilder } from '@grafana/data';
-import { Options } from 'types';
-import { Button, Collapse, Field, IconButton, Input } from '@grafana/ui';
+import { IconName, PanelOptionsEditorBuilder, StandardEditorProps } from '@grafana/data';
+import { MenuItem, Navigation, SubMenuItem } from 'types';
+import { Button, Collapse, Field, HorizontalGroup, Input, Select } from '@grafana/ui';
+import { iconOptions } from 'icons';
 
-export type NavigationMenu = MenuItem[];
-
-type MenuItem = {
-  name: string;
-  isOpen: boolean;
-  subMenu: SubMenuItem[];
-};
-
-type SubMenuItem = {
-  name: string;
-  link: string;
-  isOpen: boolean;
-};
-
-const newSubMenu: SubMenuItem = {
+const defaultSubMenuItem: SubMenuItem = {
   name: 'Submenu item',
+  icon: undefined,
   link: '',
   isOpen: true,
 };
 
-const newMenu: MenuItem = {
+const defaultMenuItem: MenuItem = {
   name: 'Menu item',
   isOpen: true,
-  subMenu: [newSubMenu],
+  subMenu: [defaultSubMenuItem],
 };
 
-function Editor({ value, onChange }: { value: NavigationMenu; onChange: (value: NavigationMenu) => void }) {
-  const [state, setState] = React.useState<NavigationMenu>(value);
+function Editor({value , onChange, context }: StandardEditorProps<Navigation>) {
+  const [menu, setMenu] = React.useState<Navigation['menu']>(value.menu);
+  const [title, setTitle] = React.useState<Navigation['title']>(value.title);
+  const [icon, setIcon] = React.useState<Navigation['icon']>(value.icon);
+  const [tooltip, setTooltip] = React.useState<Navigation['tooltip']>(value.tooltip);
+  const [position, setPosition] = React.useState<Navigation['position']>(value.position);
+  const [iconSize, setIconSize] = React.useState<Navigation['iconSize']>(value.iconSize);
 
   function onToggleMenu(index: number) {
-    const newState = [...state];
-    newState[index] = { ...newState[index], isOpen: !newState[index].isOpen };
-    setState(newState);
+    const newMenu = [...menu];
+    newMenu[index] = { ...newMenu[index], isOpen: !newMenu[index].isOpen };
+    setMenu(newMenu);
   }
 
   function onAddNewMenu() {
-    setState([...state, newMenu]);
+    setMenu([...menu, defaultMenuItem]);
   }
 
   function onAddNewSubMenu(menuIndex: number) {
-    const newState = [...state];
-    newState[menuIndex] = { ...newState[menuIndex], subMenu: [...newState[menuIndex].subMenu, newSubMenu] };
-    setState(newState);
+    const newMenu = [...menu];
+    newMenu[menuIndex] = { ...newMenu[menuIndex], subMenu: [...newMenu[menuIndex].subMenu, defaultSubMenuItem] };
+    setMenu(newMenu);
   }
 
   function onToggleSubMenu(menuIndex: number, suMenuIndex: number) {
-    const newState = [...state];
+    const newMenu = [...menu];
 
-    newState[menuIndex].subMenu[suMenuIndex] = {
-      ...newState[menuIndex].subMenu[suMenuIndex],
-      isOpen: !newState[menuIndex].subMenu[suMenuIndex].isOpen,
+    newMenu[menuIndex].subMenu[suMenuIndex] = {
+      ...newMenu[menuIndex].subMenu[suMenuIndex],
+      isOpen: !newMenu[menuIndex].subMenu[suMenuIndex].isOpen,
     };
-    setState(newState);
+    setMenu(newMenu);
   }
 
   function onSubMenuNameChange(menuIndex: number, subMenuIndex: number, name: string) {
-    const newState = [...state];
-    newState[menuIndex].subMenu[subMenuIndex] = { ...newState[menuIndex].subMenu[subMenuIndex], name };
-    setState(newState);
+    const newMenu = [...menu];
+    newMenu[menuIndex].subMenu[subMenuIndex] = { ...newMenu[menuIndex].subMenu[subMenuIndex], name };
+    setMenu(newMenu);
+  }
+
+  function onSubMenuIconChange(menuIndex: number, subMenuIndex: number, icon?: IconName) {
+    const newMenu = [...menu];
+    newMenu[menuIndex].subMenu[subMenuIndex] = { ...newMenu[menuIndex].subMenu[subMenuIndex], icon };
+    setMenu(newMenu);
   }
 
   function onMenuNameChange(menuIndex: number, name: string) {
-    const newState = [...state];
-    newState[menuIndex] = { ...newState[menuIndex], name };
-    setState(newState);
+    const newMenu = [...menu];
+    newMenu[menuIndex] = { ...newMenu[menuIndex], name };
+    setMenu(newMenu);
   }
 
   function onSubMenuLinkChange(menuIndex: number, subMenuIndex: number, link: string) {
-    const newState = [...state];
-    newState[menuIndex].subMenu[subMenuIndex] = { ...newState[menuIndex].subMenu[subMenuIndex], link };
-    setState(newState);
+    const newMenu = [...menu];
+    newMenu[menuIndex].subMenu[subMenuIndex] = { ...newMenu[menuIndex].subMenu[subMenuIndex], link };
+    setMenu(newMenu);
   }
 
   const onDeleteSubmenu = (menuIndex: number, subMenuIndex: number) => {
-    const newState = [...state];
-    newState[menuIndex].subMenu.splice(subMenuIndex, 1);
-    setState(newState);
+    const newMenu = [...menu];
+    newMenu[menuIndex].subMenu.splice(subMenuIndex, 1);
+    setMenu(newMenu);
   };
 
   const onDeleteMenuItem = (menuIndex: number) => {
-    const newState = [...state];
-    newState.splice(menuIndex, 1);
-    setState(newState);
+    const newMenu = [...menu];
+    newMenu.splice(menuIndex, 1);
+    setMenu(newMenu);
   };
+
 
   return (
     <>
-      {state.map((menu, menuIndex) => {
+      <Field
+        label="Navigation Title"
+      >
+        <Input
+          value={title}
+          onChange={(e) => setTitle(e.currentTarget.value)}
+        />
+      </Field>
+      <Field
+        label="Tooltip"
+      >
+        <Input
+          value={tooltip}
+          onChange={(e) => setTooltip(e.currentTarget.value)}
+        />
+      </Field>
+      <Field label="Icon">
+        <HorizontalGroup>
+          <Field
+            label="Icon"
+          >
+            <Select
+              options={iconOptions}
+              value={icon}
+              onChange={(option) => setIcon(option.value)}
+            />
+          </Field>
+          <Field
+            label="Size"
+          >
+            <Select
+              options={iconOptions}
+              value={icon}
+              onChange={(option) => setIconSize(option.value)}
+            />
+          </Field>
+        </HorizontalGroup>
+      </Field>
+
+      <Field label="Position">
+        <HorizontalGroup>
+
+          <Field
+            label="Top"
+          >
+            <Input
+              value={position.top}
+              onChange={(e) => setPosition({ ...position, top: e.currentTarget.value })}
+            />
+          </Field>
+          <Field
+            label="Right"
+          >
+            <Input
+              value={position.right}
+              onChange={(e) => setPosition({ ...position, right: e.currentTarget.value})}
+            />
+          </Field>
+          <Field
+            label="Bottom"
+          >
+            <Input
+              value={position.bottom}
+              onChange={(e) => setPosition({ ...position, bottom: e.currentTarget.value})}
+            />
+          </Field>
+          <Field
+            label="Left"
+          >
+            <Input
+              value={position.left}
+              onChange={(e) => setPosition({ ...position, left: e.currentTarget.value})}
+            />
+          </Field>
+        </HorizontalGroup>
+      </Field>
+
+      {menu.map((menuItem, menuIndex) => {
         return (
           <Collapse
             key={menuIndex}
-            label={`Menu ${menuIndex + 1}`}
-            isOpen={menu.isOpen}
+            label={context.replaceVariables ? context.replaceVariables(menuItem.name) : menuItem.name}
+            isOpen={menuItem.isOpen}
             onToggle={() => onToggleMenu(menuIndex)}
             collapsible
           >
-            <Field label={'Name'}>
-              <Input value={menu.name} onChange={(e) => onMenuNameChange(menuIndex, e.currentTarget.value)} />
+            <Field
+              label="Name"
+
+            >
+              <Input
+                value={menuItem.name}
+                onChange={(e) => onMenuNameChange(menuIndex, e.currentTarget.value)}
+              />
             </Field>
 
-            {menu.subMenu.map((subMenu, subMenuIndex) => {
+            {menuItem.subMenu.map((subMenu, subMenuIndex) => {
               return (
                 <Collapse
                   key={subMenuIndex}
-                  label={subMenu.name}
+                  label={context.replaceVariables ? context.replaceVariables(subMenu.name) : subMenu.name}
                   isOpen={subMenu.isOpen}
                   onToggle={() => onToggleSubMenu(menuIndex, subMenuIndex)}
+                  collapsible
                 >
                   <Field label={'Name'}>
                     <Input
                       value={subMenu.name}
                       onChange={(e) => onSubMenuNameChange(menuIndex, subMenuIndex, e.currentTarget.value)}
+                    />
+                  </Field>
+                  <Field label={'Icon'}>
+                    <Select
+                      options={iconOptions}
+                      value={subMenu.icon}
+                      onChange={(option) => onSubMenuIconChange(menuIndex, subMenuIndex, option.value)}
                     />
                   </Field>
                   <Field label={'Link'}>
@@ -124,42 +215,64 @@ function Editor({ value, onChange }: { value: NavigationMenu; onChange: (value: 
                     />
                   </Field>
 
-                  <IconButton
-                    name={'trash-alt'}
-                    variant={'destructive'}
+                  <Button
+                    icon={'trash-alt'}
                     onClick={() => onDeleteSubmenu(menuIndex, subMenuIndex)}
-                  />
+                    variant="destructive"
+                    fullWidth>
+                    Delete
+                  </Button>
                 </Collapse>
               );
             })}
 
-            <Button onClick={() => onAddNewSubMenu(menuIndex)} variant={'secondary'}>
-              Add new submenu item
-            </Button>
-            <div>
-              <IconButton name={'trash-alt'} variant={'destructive'} onClick={() => onDeleteMenuItem(menuIndex)} />
-            </div>
+            <HorizontalGroup>
+              <Button onClick={() => onAddNewSubMenu(menuIndex)} variant={'secondary'}>
+                Add new submenu item
+              </Button>
+              <Button icon={'trash-alt'} onClick={() => onDeleteMenuItem(menuIndex)} variant="destructive">
+                  Delete
+              </Button>
+            </HorizontalGroup>
           </Collapse>
         );
       })}
 
-      <Button onClick={onAddNewMenu} variant={'secondary'}>
-        Add new menu
-      </Button>
-
-      <div>
-        <Button onClick={() => onChange(state)}>Save</Button>
-      </div>
+      <HorizontalGroup>
+        <Button onClick={onAddNewMenu} variant={'secondary'}>
+          Add new menu
+        </Button>
+        <Button onClick={() => onChange({menu, title, icon, position, iconSize, tooltip })} variant="primary">
+          Save
+        </Button>
+      </HorizontalGroup>
     </>
   );
 }
 
+export interface Options {
+  navigation: Navigation;
+}
+
+const defaultNavigation = {
+  title: undefined,
+  menu: [defaultMenuItem],
+  tooltip: 'Open Navigation',
+  position: {
+    bottom: '25px',
+    right: '25px',
+  },
+  icon: 'bars',
+  iconSize: 'lg',
+};
+
 export function addEditor(builder: PanelOptionsEditorBuilder<Options>) {
   builder.addCustomEditor({
     id: 'menu',
-    path: 'menu',
-    name: 'Configure your navigation menu:',
-    defaultValue: [],
+    path: 'navigation',
+    name: 'Navigation',
+    description: 'Configure your navigation menu',
+    defaultValue: defaultNavigation,
     editor: (props) => <Editor {...props} />,
   });
 }
